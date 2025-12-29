@@ -1,222 +1,94 @@
-AGENTS.md
 概述
 
-本文件用于定义本项目中所有 AI Agents（特别是 Codex 类模型）的行为规范与操作边界。其核心目标是确保开发者对项目拥有绝对主导权，同时允许 AI 在文档方面提供协作，但禁止其对代码逻辑进行任何自动化干预。
-
-🔒 核心原则
-1. 文档可写，代码禁写
-
-AI Agents 可以修改、创建、扩展以下内容：
-
-文档类文件（如 .md、.txt、.rst、.docx 等）
-
-注释类内容
-
-设计文档、开发说明、API 说明
-
-README / CHANGELOG / 使用指南等
-
-但 AI Agents 严格禁止：
-
-修改源代码文件（如 .js, .ts, .py, .go, .java 等）
-
-修改关键逻辑（业务逻辑、权限控制、状态变更、计算流程等）
-
-自动 refactor、自动 patch、自动修复 bug
-
-自动往项目写入代码片段
-
-所有代码类操作必须由开发者明确指令才能执行。
-
-📝 允许的 Agent 行为
-
-AI Agents 允许执行以下内容：
-
-文档相关
-
-创建和编辑 Markdown 文档
-
-生成技术规格说明书
-
-改写、扩展或总结文档
-
-维护项目的 README、说明文件、架构文档
-
-代码相关（仅作为输出，不能写入文件）
-
-输出示例代码（纯文本，不写文件）
-
-提供代码解释、分析、设计建议
-
-进行代码审查（Review），但不修改文件
-
-❌ 禁止的 Agent 行为
-
-AI Agents 禁止：
-
-修改任何源代码文件
-
-在没有明确允许下创建任何代码文件
-
-自动化重构、修复或生成补丁
-
-修改：
-
-业务逻辑
-
-鉴权/权限组件
-
-安全相关模块
-
-配置文件（如 .env, docker, ci 配置）
-
-构建脚本或部署流程
-
-执行任何带副作用的操作（文件写入、指令执行等）
-
-🛡 保护区域（只读）
-
-以下内容被视为项目核心，不允许 AI 修改：
-
-关键逻辑
-
-领域业务逻辑
-
-数据处理与状态机
-
-安全相关逻辑
-
-权限/认证模块
-
-资金、交易、支付流程
-
-复杂计算、状态同步逻辑
-
-关键文件
-
-源代码文件（所有 .py, .ts, .js, .go, .java 等）
-
-配置文件（env, Dockerfile, CI 配置）
-
-构建脚本
-
-依赖文件 (package.json, requirements.txt 等)
-
-🧭 交互规则
-如果用户没有明确授权
-
-AI 必须默认使用 文档模式（Documentation-Only Mode），只输出文本，不修改文件。
-
-例外（团队工作日志）：
-
-在未获得任何写入授权时，AI 仍被允许对根目录 `work_log.md` 进行有限写入，用于记录“文件写入类工作”的协作痕迹；除 `work_log.md` 外仍必须保持只输出文本、不修改任何文件。
-
-不要求记录的情况（无需更新 `work_log.md`）：
-
-- 仅阅读文件/信息收集（read-only）
-- 仅对话讨论/方案建议/代码审查意见（不落盘）
-
-允许的写入范围：
-
-- `## Current Status (Kanban)`：仅允许更新“自己 agent.id 对应的块”（不得改动他人块；块以 `### <agent.id>` 标题为边界）。
-- `## Entries`：只允许“追加写入（append-only）”，不得改写历史条目。
-
-如果用户的请求带歧义
-
-AI 必须先确认：
-
-“你希望我直接修改文件，还是仅以文本形式输出内容？”
-
-如果用户允许修改文档文件
-
-AI 才能执行文档写入。
-
-⚙ 可覆盖默认规则的指令
-
-项目中定义了少量允许改变默认行为的指令。AI 必须在收到明确命令后才能执行：
-
-指令	说明
-WRITE_DOC:	允许修改/写入文档类文件（.md/.txt 等）
-WRITE_CODE:	必须谨慎使用，允许写入代码文件（通常禁止）
-APPLY_PATCH:	应用用户提供的补丁文件
-GENERATE_CODE:	生成代码但只输出文本，不写入任何文件
-
-AI 必须在执行这些指令前明确声明“已进入特权模式”。
-
-🔍 审查与日志
-
-AI 在执行文件修改时（限文档）必须：
-
-输出修改内容预览
-
-说明修改目的
-
-等待用户确认（可选但推荐）
-
----
-
-🗒 团队工作日志（根目录 `work_log.md`，AI 可写）
-
-目标：把多智能体（以及人类负责人）当作“团队成员”，在统一日志中持续记录角色分工、决策与进展，便于协作与交接。
-
-基本规则（强制）：
-
-1) 根目录必须存在 `work_log.md`。
-2) 根目录建议提供 `work_log_template.md`，用于跨项目复用条目模板与看板结构。
-3) `work_log.md` 应包含两个区域：
-   - `## Current Status (Kanban)`：看板区（可原地更新），用于“一眼看现在”
-   - `## Entries`：历史区（append-only），用于“可追溯记录”
-4) 仅在发生“文件写入类行为”时，才要求记录与更新 `work_log.md`；纯阅读/纯对话不要求记录。
-5) 文件写入类行为包括：创建/修改/删除/移动/重命名任何文件（无论是文档还是代码；以实际落盘为准）。
-6) 当发生文件写入类行为时：
-   - 开始写入前：更新 `## Current Status (Kanban)` 中自己对应的块（doing/next/blockers/updated）
-   - 写入完成后：向 `## Entries` 追加一条记录（append-only），并更新自己对应的看板块到最新状态
-6) 人类项目负责人也应使用同一格式记录关键决策/指令/验收结论（`agent.id` 建议使用 `human/<name>`，例如 `human/Jean`）。
-7) 每条记录必须使用统一结构，并满足“必填字段”要求；复杂任务必须补充决策、风险与验收口径。
-
-记录格式（建议使用 YAML 条目，直接追加到文件末尾）：
-
-- `timestamp`：ISO 8601（例如 `2025-12-15T10:30:00+08:00`）
-- `agent`（对象）
-  - `id`：由成员自行设置的唯一标识（对同一成员保持固定）
-  - `role`：本次职责/职位（建议参考 `README.md` 的“角色与规范索引”中的角色命名）
-- `content`（对象）
-  - 必填：`objective`、`context`、`scope`、`plan`、`status`
-  - `status` 必须包含：`doing`、`next`、`done`
-  - 选填但推荐：`decisions`、`risks`、`blockers`、`validation`、`artifacts`、`handoff`
-
-`agent.id` 命名体系（用于避免冲突，强制遵守）：
-
-原则：
-
-- 必须全仓库唯一（同一时刻不允许两名成员复用同一个 `agent.id`）。
-- 必须稳定：同一成员在整个项目周期内保持不变。
-- 必须可读：建议从“角色（参考 README）+ 编号/昵称”构造。
-
-推荐格式（任选其一，但需满足唯一性与稳定性）：
-
-- `human/<name>`（人类成员）
-- `ai/<role-slug>/<name-or-n>`（AI 成员）
-
-示例：
-
-- `human/Jean`（项目负责人本人可用；也可用 `human/lead-Jean`）
-- `ai/backend/01`（后端工程师）
-- `ai/frontend/01`（前端工程师）
-- `ai/architecture/01`（架构师）
-- `ai/qa-testing/01`（测试工程师）
-- `ai/devops/01`（DevOps 工程师）
-- `ai/security/01`（安全工程师）
-- `ai/product-manager/01`（产品经理）
-- `ai/ux-designer/01`（UX 设计师）
-- `ai/agent-orchestrator/01`（AI Agents 编排工程师）
-
-扩展规则：
-
-- `scope.out` 必须填写，用于控制范围蔓延。
-- `artifacts` 应尽量写可点击的路径（例如 `README.md:12`、`AGENTS.md:80`）或可复现命令（用反引号包裹）。
-
-🧾 版本管理
-
-本文件的任何修改必须由人类开发者手动完成。
-AI Agents 不得自动调整本规范，除非开发者明确要求。
+本文件是项目级 AGENTS 规范模板，用于定义多智能体在技术项目中的协作方式与权限边界。
+核心目标：负责人绝对主导、多智能体像真实团队协作、禁止自动改动代码逻辑。
+
+一、核心原则
+1) 文档可写，代码禁写
+- AI 仅可写文档类文件（.md/.txt 等）。
+- 任何代码或配置变更必须由负责人明确授权（WRITE_CODE），并指定范围。
+
+2) 分层协作 + 代表制
+- 个人层：每个 agent 维护 plan/log/inbox/outbox。
+- 部门层：部门内讨论只在部门频道进行。
+- 全局层：跨部门沟通由部门代表发起与汇总。
+- 领导层：所有部门代表向最高负责人汇报。
+
+3) 结果导向汇报
+- 不需要逐行代码汇报。
+- 汇报只包含：交付物、风险、下一步、所需支持。
+
+二、组织架构与汇报链路
+当前组织架构（可按需扩展）：
+- human/gong（最高负责人）
+  - ai/tech-lead/rep-01（技术负责人/DRI）
+    - ai/backend/rep-01（后端代表）
+    - ai/frontend/rep-01（前端代表）
+  - ai/agent-orchestrator/01（AI 编排负责人/跨部门）
+
+组织架构文件：coordination/org_chart.md
+
+三、协作系统（agent-collab）
+协作资料统一放在：
+- 工作副本：agent-collab/
+- 模板副本：agent-collab.template/
+
+建议结构：
+- agents/：角色计划与日志
+- channels/：部门频道、全局频道、领导频道
+- coordination/：requests/decisions/risks/roadmap/standups/org_chart
+- templates/：新增角色或部门的模板（含 role/ 复制包）
+
+四、新会话 = 新员工接入流程
+1) 角色判断
+- 接管旧角色：必须复用原 agent.id，不允许新建 ID。
+- 负责新模块：创建新的唯一 agent.id。
+
+2) 接管旧角色
+- 复用原 agent.id 的 plan/log/inbox/outbox。
+- 在 log 中写明“接管说明”，标注时间与职责范围。
+
+3) 新建角色
+- 选择唯一 ID（推荐 ai/<dept>/rep-01 或 ai/<dept>/<n>）。
+- 从 templates/role/ 复制为 agents/<id>/。
+- 替换文件内的 ID 与角色信息。
+- 在 agents/<id>/ 下创建空的 AGENTS.md（由负责人后续注入角色规范）。
+- 人类角色使用 agents/human/<name>/。
+- 在部门频道公告加入。
+- 如果是代表角色，必须在 global + leadership 频道公告。
+
+五、沟通路径
+- 一对一：agents/<id>/inbox.md 与 outbox.md
+- 部门内：channels/dept-*.md
+- 跨部门：channels/global.md（仅代表）
+- 领导汇报：channels/leadership.md 或 agents/human/<owner>/inbox.md
+
+六、记录与决策
+- 决策：coordination/decisions.md
+- 请求：coordination/requests.md
+- 风险：coordination/risks.md
+- 进度：coordination/standups.md
+- 组织架构：coordination/org_chart.md
+- 全部 append-only，不改写历史
+
+七、权限边界
+禁止 AI 自动执行：
+- 修改任何源代码文件（.js/.ts/.py/.go/.java 等）
+- 修改配置文件（.env、Dockerfile、CI、部署脚本）
+- 自动 refactor、自动 patch、自动修 bug
+- 执行带副作用的系统指令
+
+八、交互规则
+- 默认文档模式：只输出文本，不写文件。
+- 若需求不明确，必须先确认是否允许写入。
+
+九、可覆盖默认规则的指令
+- WRITE_DOC：允许修改文档类文件
+- WRITE_CODE：允许修改代码文件（需谨慎）
+- APPLY_PATCH：仅应用用户提供的补丁
+- GENERATE_CODE：只输出代码文本，不写文件
+- 执行前必须声明“已进入特权模式”
+
+十、模板使用说明
+- 本文件用于生成项目内 AGENTS.md。
+- 由负责人手动替换/裁剪后生效。
